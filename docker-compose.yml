@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-shiftlog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shiftlog_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-shiftlog}
+    ports:
+      - "5432:5432"
+    volumes:
+      - shiftlog_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shiftlog}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-shiftlog}:${POSTGRES_PASSWORD:-shiftlog_dev_password}@db:5432/${POSTGRES_DB:-shiftlog}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  shiftlog_pgdata:
