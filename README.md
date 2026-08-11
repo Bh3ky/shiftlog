@@ -36,8 +36,15 @@ docker-compose exec api python seed.py
 
 ### Running locally without Docker
 
+**Requires Python 3.12** (see `.python-version`). `psycopg2-binary==2.9.9`
+only ships prebuilt wheels through Python 3.12 - on 3.13+ pip falls back to
+building it from source, which fails unless you happen to have PostgreSQL's
+dev headers installed. If `pip install -r requirements.txt` fails with a
+"Getting requirements to build wheel" error, this is almost certainly why -
+switch to 3.12 rather than trying to fix the build.
+
 ```bash
-python -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
