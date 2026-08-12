@@ -109,3 +109,21 @@ def test_upcoming_shifts_returns_only_within_window(client: TestClient, worker_i
     ids=[s["id"] for s in response.json()]
     assert within_window["id"] in ids
     assert out_of_window["id"] not in ids
+
+
+def test_shift_duration(client: TestClient, worker_id: int):
+    create = client.post(
+        "/shifts",
+        json={
+            "worker_id": worker_id,
+            "start_time": "2026-08-10T09:00:00",
+            "end_time": "2026-08-10T17:00:00",
+        },
+    )
+    shift_id = create.json()["id"]
+
+    get_response = client.get(f"/shifts/{shift_id}")
+    assert get_response.status_code == 200
+
+    data = get_response.json()
+    assert data["duration_hours"] == 8.0
