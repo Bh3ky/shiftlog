@@ -8,8 +8,9 @@ from app.database import get_session
 from app.models import Shift, Worker, WorkerCreate, WorkerRead, WorkerSummary, WorkerUpdate
 from app.rate_limiter import limiter
 
-router = APIRouter(prefix="/workers", tags=["workers"])
+from app.routers import shifts
 
+router = APIRouter(prefix="/workers", tags=["workers"])
 
 @router.post("", response_model=WorkerRead, status_code=201)
 @limiter.limit("10/30seconds")
@@ -106,6 +107,20 @@ def get_worker(worker_id: int, session: Session = Depends(get_session)):
     if worker is None:
         raise HTTPException(status_code=404, detail="Worker not found")
     return worker
+
+@router.delete("/{worker_id}", status_code=204)
+def delete_worker(worker_id: int, session: Session = Depends(get_session)):
+    worker = session.get(Worker, worker_id)
+    if worker is None:
+        raise HTTPException(status_code=404, detail="Worker not found")
+
+    workerShifts = shifts.list_shifts(worker_id, None, None, None, "asc", session)
+
+    for i in range(0,len(workerShifts)):
+        session.delete(workerShifts[i])
+
+    session.delete(worker)
+    session.commit()
 
 
 @router.get("/{worker_id}/summary", response_model=WorkerSummary)
