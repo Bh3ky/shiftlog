@@ -89,6 +89,12 @@ class WorkerSummary(SQLModel):
     shift_count: int
 
 
+class OrgHoursSummary(SQLModel):
+    workers: list[WorkerSummary]
+    grand_total_hours: float
+    total_shift_count: int
+
+
 class RejectedShift(SQLModel):
     shift: ShiftCreate
     reason: str
