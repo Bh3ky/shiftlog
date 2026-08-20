@@ -62,7 +62,7 @@ class ShiftBase(SQLModel):
         start_time = info.data.get("start_time")
         if start_time is not None and (((end_time - start_time) > datetime.timedelta(hours=24))or
                                        ((end_time - start_time) < datetime.timedelta(minutes=30))):
-            raise ValueError(f"A shift must last at least 30 minutes and no more than 24 hours.")
+            raise ValueError("A shift must last at least 30 minutes and no more than 24 hours.")
         return end_time
 
 class Shift(ShiftBase, table=True):
@@ -90,6 +90,8 @@ class ShiftConflictGroup(SQLModel):
     conflicting_shifts: list[ShiftRead]
 
 
+class ShiftUpdate(ShiftBase):
+    pass
 class WorkerSummary(SQLModel):
     worker_id: int
     total_hours: float
