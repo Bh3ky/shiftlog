@@ -19,6 +19,14 @@ class WorkerBase(SQLModel):
     active: bool = Field(default=True, description="Indicates whether the worker is active or not")
     pay: Optional[float] = Field(default=None, description="Hourly pay of the worker")
 
+    @field_validator("name")
+    @classmethod
+    def name_length(cls, name):
+        name=" ".join(name.split())
+        if (len(name) == 0):
+            raise ValueError('Name cannot be empty after removing whitespaces.')
+        return name
+
     @field_validator("pay")
     @classmethod
     def pay_is_positive(cls, pay: float, info):
