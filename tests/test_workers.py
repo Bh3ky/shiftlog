@@ -92,6 +92,23 @@ def test_unscheduled_workers_excludes_worker_with_shifts(client: TestClient):
     assert body["id"] not in returned_ids
 
 
+def test_unscheduled_workers_exclude_inactive_workers(client: TestClient):
+    response = client.post("/workers", json={"name": "Jamie Lee", "role": "Cook"})
+    assert response.status_code == 201
+    body = response.json()
+
+    worker_id = body["id"]
+
+    update_res = client.put(f"/workers/{worker_id}", json={"name": "Jamie Lee", "role": "Cook", "active": False})
+    assert update_res.status_code == 200
+    assert update_res.json()["active"] is False
+
+    response = client.get("/workers/unscheduled")
+    assert response.status_code == 200
+    returned_ids = {w["id"] for w in response.json()}
+    assert body["id"] not in returned_ids
+
+
 def test_unscheduled_workers_return_empty_list_when_all_workers_scheduled(client: TestClient):
     worker1_response = client.post("/workers", json={"name": "Jamie Lee", "role": "Cook"})
     worker2_response = client.post("/workers", json={"name": "Sam Osei", "role": "Cashier"})

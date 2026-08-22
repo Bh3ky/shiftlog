@@ -170,7 +170,7 @@ def get_unscheduled_workers(session: Session = Depends(get_session)):
     
     """
     shift_exists = select(Shift).where(Shift.worker_id == Worker.id).exists()
-    unscheduled_workers_query = select(Worker).where(not_(shift_exists))
+    unscheduled_workers_query = select(Worker).where(Worker.active ==True, not_(shift_exists))
 
     return session.exec(unscheduled_workers_query).all()
 
